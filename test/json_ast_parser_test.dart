@@ -431,6 +431,150 @@ void main() {
     });
   });
 
+  group('Decode with location', () {
+    test('String', () {
+      {
+        final ast = jsonDecodeASTWithLocation('"hello"');
+        expect(ast, isA<ASTStringWithLocation>());
+        ast as ASTStringWithLocation;
+        expect(ast.value, equals('hello'));
+        expect(ast.start, equals(0));
+        expect(ast.end, equals(7));
+      }
+      {
+        final ast = jsonDecodeASTWithLocation('  "hello\tworld"');
+        expect(ast, isA<ASTStringWithLocation>());
+        ast as ASTStringWithLocation;
+        expect(ast.value, equals('hello\tworld'));
+        expect(ast.start, equals(2));
+        expect(ast.end, equals(15));
+      }
+    });
+
+    test('Number', () {
+      {
+        final ast = jsonDecodeASTWithLocation('123');
+        expect(ast, isA<ASTNumberWithLocation>());
+        ast as ASTNumberWithLocation;
+        expect(ast.value, equals(123));
+        expect(ast.start, equals(0));
+        expect(ast.end, equals(3));
+      }
+      {
+        final ast = jsonDecodeASTWithLocation('  123.456  ');
+        expect(ast, isA<ASTNumberWithLocation>());
+        ast as ASTNumberWithLocation;
+        expect(ast.value, equals(123.456));
+        expect(ast.start, equals(2));
+        expect(ast.end, equals(9));
+      }
+      {
+        final ast = jsonDecodeASTWithLocation('  -123.456  ');
+        expect(ast, isA<ASTNumberWithLocation>());
+        ast as ASTNumberWithLocation;
+        expect(ast.value, equals(-123.456));
+        expect(ast.start, equals(2));
+        expect(ast.end, equals(10));
+      }
+      {
+        final ast = jsonDecodeASTWithLocation('  123e4  ');
+        expect(ast, isA<ASTNumberWithLocation>());
+        ast as ASTNumberWithLocation;
+        expect(ast.value, equals(123e4));
+        expect(ast.start, equals(2));
+        expect(ast.end, equals(7));
+      }
+    });
+
+    test('Bool', () {
+      {
+        final ast = jsonDecodeASTWithLocation('true');
+        expect(ast, isA<ASTBooleanWithLocation>());
+        ast as ASTBooleanWithLocation;
+        expect(ast.value, equals(true));
+        expect(ast.start, equals(0));
+        expect(ast.end, equals(4));
+      }
+      {
+        final ast = jsonDecodeASTWithLocation('  false  ');
+        expect(ast, isA<ASTBooleanWithLocation>());
+        ast as ASTBooleanWithLocation;
+        expect(ast.value, equals(false));
+        expect(ast.start, equals(2));
+        expect(ast.end, equals(7));
+      }
+    });
+
+    test('Null', () {
+      {
+        final ast = jsonDecodeASTWithLocation('null');
+        expect(ast, isA<ASTNullWithLocation>());
+        ast as ASTNullWithLocation;
+        expect(ast.start, equals(0));
+        expect(ast.end, equals(4));
+      }
+      {
+        final ast = jsonDecodeASTWithLocation('  null  ');
+        expect(ast, isA<ASTNullWithLocation>());
+        ast as ASTNullWithLocation;
+        expect(ast.start, equals(2));
+        expect(ast.end, equals(6));
+      }
+    });
+
+    test('List', () {
+      {
+        final ast = jsonDecodeASTWithLocation('[0, 1, 2]');
+        expect(ast, isA<ASTArrayWithLocation>());
+        ast as ASTArrayWithLocation;
+        expect(ast, orderedEquals([ASTNumber(0), ASTNumber(1), ASTNumber(2)]));
+        expect(ast.start, equals(0));
+        expect(ast.end, equals(9));
+      }
+      {
+        final ast = jsonDecodeASTWithLocation('  [0, 1, 2]  ');
+        expect(ast, isA<ASTArrayWithLocation>());
+        ast as ASTArrayWithLocation;
+        expect(ast, orderedEquals([ASTNumber(0), ASTNumber(1), ASTNumber(2)]));
+        expect(ast.start, equals(2));
+        expect(ast.end, equals(11));
+      }
+    });
+
+    test('Object', () {
+      {
+        final ast = jsonDecodeASTWithLocation('{"key":0,"key2":1}');
+        expect(ast, isA<ASTObjectWithLocation>());
+        ast as ASTObjectWithLocation;
+        expect(
+          ast,
+          equals({
+            ASTString('key'): ASTNumber(0),
+            ASTString('key2'): ASTNumber(1),
+          }),
+        );
+        expect(ast.start, equals(0));
+        expect(ast.end, equals(18));
+      }
+      {
+        final ast = jsonDecodeASTWithLocation(
+          '  {  "key"  :   0   ,   "key2"  :  1  ,  }  ',
+        );
+        expect(ast, isA<ASTObjectWithLocation>());
+        ast as ASTObjectWithLocation;
+        expect(
+          ast,
+          equals({
+            ASTString('key'): ASTNumber(0),
+            ASTString('key2'): ASTNumber(1),
+          }),
+        );
+        expect(ast.start, equals(2));
+        expect(ast.end, equals(42));
+      }
+    });
+  });
+
   group('Benchmark', () {
     test('Big JSON', () {
       final random = Random(83792465);

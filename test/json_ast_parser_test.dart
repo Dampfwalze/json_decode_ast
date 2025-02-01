@@ -137,51 +137,42 @@ void main() {
 
     group('Array', () {
       test('Empty', () {
-        expect(parseArray('[]', 0).$1.elements, orderedEquals([]));
-        expect(parseArray('[  ]', 0).$1.elements, orderedEquals([]));
-        expect(parseArray('[\n]', 0).$1.elements, orderedEquals([]));
+        expect(parseArray('[]', 0).$1, orderedEquals([]));
+        expect(parseArray('[  ]', 0).$1, orderedEquals([]));
+        expect(parseArray('[\n]', 0).$1, orderedEquals([]));
         expect(() => parseArray('[,]', 0), throwsFormatException);
       });
 
       test('Single element', () {
-        expect(parseArray('[0]', 0).$1.elements, orderedEquals([ASTNumber(0)]));
+        expect(parseArray('[0]', 0).$1, orderedEquals([ASTNumber(0)]));
+        expect(parseArray('[0,]', 0).$1, orderedEquals([ASTNumber(0)]));
+        expect(parseArray('["", ]', 0).$1, orderedEquals([ASTString("")]));
         expect(
-          parseArray('[0,]', 0).$1.elements,
-          orderedEquals([ASTNumber(0)]),
-        );
-        expect(
-          parseArray('["", ]', 0).$1.elements,
-          orderedEquals([ASTString("")]),
-        );
-        expect(
-          parseArray('[  true\n]', 0).$1.elements,
+          parseArray('[  true\n]', 0).$1,
           orderedEquals([ASTBoolean(true)]),
         );
         expect(
-          parseArray('[false\n,]', 0).$1.elements,
+          parseArray('[false\n,]', 0).$1,
           orderedEquals([ASTBoolean(false)]),
         );
-        expect(
-          parseArray('[  null\n, ]', 0).$1.elements,
-          orderedEquals([ASTNull()]),
-        );
+        expect(parseArray('[  null\n, ]', 0).$1, orderedEquals([ASTNull()]));
       });
 
       test('Multiple elements', () {
         expect(
-          parseArray('[0, 1, 2]', 0).$1.elements,
+          parseArray('[0, 1, 2]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1), ASTNumber(2)]),
         );
         expect(
-          parseArray('[0, 1, 2,]', 0).$1.elements,
+          parseArray('[0, 1, 2,]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1), ASTNumber(2)]),
         );
         expect(
-          parseArray('[0, 1, 2, ]', 0).$1.elements,
+          parseArray('[0, 1, 2, ]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1), ASTNumber(2)]),
         );
         expect(
-          parseArray('[0, 1, 2,  ]', 0).$1.elements,
+          parseArray('[0, 1, 2,  ]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1), ASTNumber(2)]),
         );
       });
@@ -189,44 +180,44 @@ void main() {
 
     group('Object', () {
       test('Empty', () {
-        expect(parseObject('{}', 0).$1.properties, equals({}));
-        expect(parseObject('{  }', 0).$1.properties, equals({}));
-        expect(parseObject('{\n}', 0).$1.properties, equals({}));
+        expect(parseObject('{}', 0).$1, equals({}));
+        expect(parseObject('{  }', 0).$1, equals({}));
+        expect(parseObject('{\n}', 0).$1, equals({}));
         expect(() => parseObject('{,}', 0), throwsFormatException);
       });
 
       test('Single property', () {
         expect(
-          parseObject('{"key":0}', 0).$1.properties,
+          parseObject('{"key":0}', 0).$1,
           equals({ASTString('key'): ASTNumber(0)}),
         );
         expect(
-          parseObject('{ "key" :0,}', 0).$1.properties,
+          parseObject('{ "key" :0,}', 0).$1,
           equals({ASTString('key'): ASTNumber(0)}),
         );
         expect(
-          parseObject('{  "key"   :   0  , }', 0).$1.properties,
+          parseObject('{  "key"   :   0  , }', 0).$1,
           equals({ASTString('key'): ASTNumber(0)}),
         );
       });
 
       test('Multiple properties', () {
         expect(
-          parseObject('{"key":0,"key2":1}', 0).$1.properties,
+          parseObject('{"key":0,"key2":1}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject('{ "key" :0, "key2":1,}', 0).$1.properties,
+          parseObject('{ "key" :0, "key2":1,}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject('{  "key"   :   0  , "key2":1, }', 0).$1.properties,
+          parseObject('{  "key"   :   0  , "key2":1, }', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
@@ -237,18 +228,16 @@ void main() {
       test('Recursive', () {
         {
           final (object, _) = parseObject('{"key":{}}', 0);
-          if (object case ASTObject(
-            properties: {const ASTString("key"): ASTObject(properties: var p)},
-          ) when p.isEmpty) {
+          if (object case {
+            const ASTString("key"): var p,
+          } when p is ASTObject && p.isEmpty) {
           } else {
             fail('Unexpected ASTObject: $object');
           }
         }
         {
           final (object, _) = parseObject('{ "key":[  ] }  ', 0);
-          if (object case ASTObject(
-            properties: {const ASTString("key"): ASTArray(elements: [])},
-          )) {
+          if (object case {const ASTString("key"): []}) {
           } else {
             fail('Unexpected ASTObject: $object');
           }
@@ -258,19 +247,11 @@ void main() {
             '{  "key "   :  [{ "Hello" : "World" }],  }',
             0,
           );
-          if (object case ASTObject(
-            properties: {
-              const ASTString("key "): ASTArray(
-                elements: [
-                  ASTObject(
-                    properties: {
-                      const ASTString("Hello"): const ASTString("World"),
-                    },
-                  ),
-                ],
-              ),
-            },
-          )) {
+          if (object case {
+            const ASTString("key "): [
+              {const ASTString("Hello"): const ASTString("World")},
+            ],
+          }) {
           } else {
             fail('Unexpected ASTObject: $object');
           }
@@ -297,32 +278,29 @@ void main() {
 
       test('In array', () {
         expect(
-          parseArray('[0, // Comment\n1]', 0).$1.elements,
+          parseArray('[0, // Comment\n1]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
         expect(
-          parseArray('[0, // Hello, World\n1,]', 0).$1.elements,
+          parseArray('[0, // Hello, World\n1,]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
         expect(
-          parseArray('[0, // [This, should, not, matter]\n1,]', 0).$1.elements,
+          parseArray('[0, // [This, should, not, matter]\n1,]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
       });
 
       test('In object', () {
         expect(
-          parseObject('{"key":0, // Comment\n"key2":1}', 0).$1.properties,
+          parseObject('{"key":0, // Comment\n"key2":1}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject(
-            '{ "key" :0, // Hello, World\n"key2":1,}',
-            0,
-          ).$1.properties,
+          parseObject('{ "key" :0, // Hello, World\n"key2":1,}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
@@ -332,7 +310,7 @@ void main() {
           parseObject(
             '{  "key"   :   0  , // ["This", "should", "not", "matter"]\n "key2":1, }',
             0,
-          ).$1.properties,
+          ).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
@@ -342,7 +320,7 @@ void main() {
           parseObject(
             '{  "key"   :   0  ,// {"this": "should", "not": "matter"}\n "key2":1, }',
             0,
-          ).$1.properties,
+          ).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
@@ -370,32 +348,29 @@ void main() {
 
       test('In array', () {
         expect(
-          parseArray('[0, /* Comment */1]', 0).$1.elements,
+          parseArray('[0, /* Comment */1]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
         expect(
-          parseArray('[0,/* Hello, World */\n1,]', 0).$1.elements,
+          parseArray('[0,/* Hello, World */\n1,]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
         expect(
-          parseArray('[0, /* [This, should, not, matter] */1,]', 0).$1.elements,
+          parseArray('[0, /* [This, should, not, matter] */1,]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
       });
 
       test('In object', () {
         expect(
-          parseObject('{"key":0, /* Comment */\n"key2":1}', 0).$1.properties,
+          parseObject('{"key":0, /* Comment */\n"key2":1}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject(
-            '{ "key" :0,/* Hello, World */"key2":1,}',
-            0,
-          ).$1.properties,
+          parseObject('{ "key" :0,/* Hello, World */"key2":1,}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
@@ -405,7 +380,7 @@ void main() {
           parseObject(
             '{  "key"   :   0  , /* ["This", "should", "not", "matter"] */\n "key2":1, }',
             0,
-          ).$1.properties,
+          ).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
@@ -415,7 +390,7 @@ void main() {
           parseObject(
             '{  "key"   :   0  ,/* {"this": "should", "not": "matter"} */"key2":1, }',
             0,
-          ).$1.properties,
+          ).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
@@ -427,14 +402,12 @@ void main() {
 
   group('Decode JSON', () {
     test('Single values', () {
-      if (jsonDecodeAST('{}') case ASTObject(
-        properties: var p,
-      ) when p.isEmpty) {
+      if (jsonDecodeAST('{}') case var p when p is ASTObject && p.isEmpty) {
       } else {
         fail('Unexpected ASTObject');
       }
 
-      if (jsonDecodeAST('[]') case ASTArray(elements: [])) {
+      if (jsonDecodeAST('[]') case []) {
       } else {
         fail('Unexpected ASTArray');
       }

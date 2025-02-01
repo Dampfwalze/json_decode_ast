@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+
 sealed class ASTNode {
   const ASTNode();
 }
@@ -7,76 +9,54 @@ abstract interface class ASTNodeWithLocation implements ASTNode {
   int get end;
 }
 
-abstract mixin class ASTObject implements ASTNode {
-  Map<ASTString, ASTNode> get properties;
-
+abstract mixin class ASTObject implements ASTNode, Map<ASTString, ASTNode> {
   factory ASTObject(Map<ASTString, ASTNode> properties) = _ASTObject;
-
-  @override
-  bool operator ==(Object other) => switch (other) {
-    ASTObject(properties: final p) => p == properties,
-    Map p => p == properties,
-    _ => false,
-  };
-
-  @override
-  int get hashCode => properties.hashCode;
-
-  @override
-  String toString() => 'ASTObject($properties)';
 }
 
-class _ASTObject with ASTObject {
-  @override
-  final Map<ASTString, ASTNode> properties;
+class _ASTObject extends DelegatingMap<ASTString, ASTNode> with ASTObject {
+  const _ASTObject(super.base);
 
-  const _ASTObject(this.properties);
+  @override
+  String toString() => 'ASTObject(${super.toString()})';
 }
 
-class ASTObjectWithLocation with ASTObject implements ASTNodeWithLocation {
-  @override
-  final Map<ASTStringWithLocation, ASTNodeWithLocation> properties;
-
+class ASTObjectWithLocation extends DelegatingMap<ASTString, ASTNode>
+    with ASTObject
+    implements ASTNodeWithLocation {
   @override
   final int start;
   @override
   final int end;
 
-  const ASTObjectWithLocation(this.properties, this.start, this.end);
+  const ASTObjectWithLocation(super.base, this.start, this.end);
 
   @override
-  String toString() => 'ASTObject($properties, $start, $end)';
+  String toString() => 'ASTObject($start, $end, ${super.toString()})';
 }
 
-abstract mixin class ASTArray implements ASTNode {
-  List<ASTNode> get elements;
-
+abstract mixin class ASTArray implements ASTNode, List<ASTNode> {
   factory ASTArray(List<ASTNode> elements) = _ASTArray;
-
-  @override
-  String toString() => 'ASTArray($elements)';
 }
 
-class _ASTArray with ASTArray {
-  @override
-  final List<ASTNode> elements;
+class _ASTArray extends DelegatingList<ASTNode> with ASTArray {
+  const _ASTArray(super.base);
 
-  const _ASTArray(this.elements);
+  @override
+  String toString() => 'ASTArray(${super.toString()})';
 }
 
-class ASTArrayWithLocation with ASTArray implements ASTNodeWithLocation {
-  @override
-  final List<ASTNodeWithLocation> elements;
-
+class ASTArrayWithLocation extends DelegatingList<ASTNode>
+    with ASTArray
+    implements ASTNodeWithLocation {
   @override
   final int start;
   @override
   final int end;
 
-  const ASTArrayWithLocation(this.elements, this.start, this.end);
+  const ASTArrayWithLocation(super.base, this.start, this.end);
 
   @override
-  String toString() => 'ASTArray($elements, $start, $end)';
+  String toString() => 'ASTArray($start, $end, ${super.toString()})';
 }
 
 class ASTString extends ASTNode {
@@ -95,7 +75,9 @@ class ASTString extends ASTNode {
   int get hashCode => value.hashCode;
 
   @override
-  String toString() => 'ASTString("$value")';
+  String toString() => value;
+
+  String toJson() => value;
 }
 
 class ASTStringWithLocation extends ASTString implements ASTNodeWithLocation {
@@ -127,6 +109,8 @@ class ASTNumber extends ASTNode {
 
   @override
   String toString() => 'ASTNumber($value)';
+
+  num toJson() => value;
 }
 
 class ASTNumberWithLocation extends ASTNumber implements ASTNodeWithLocation {
@@ -158,6 +142,8 @@ class ASTBoolean extends ASTNode {
 
   @override
   String toString() => 'ASTBoolean($value)';
+
+  bool toJson() => value;
 }
 
 class ASTBooleanWithLocation extends ASTBoolean implements ASTNodeWithLocation {
@@ -183,6 +169,8 @@ class ASTNull extends ASTNode {
 
   @override
   String toString() => 'ASTNull()';
+
+  Null toJson() => null;
 }
 
 class ASTNullWithLocation extends ASTNull implements ASTNodeWithLocation {

@@ -2,10 +2,15 @@ sealed class ASTNode {
   const ASTNode();
 }
 
-class ASTObject extends ASTNode {
-  final Map<ASTString, ASTNode> properties;
+abstract interface class ASTNodeWithLocation implements ASTNode {
+  int get start;
+  int get end;
+}
 
-  const ASTObject(this.properties);
+abstract mixin class ASTObject implements ASTNode {
+  Map<ASTString, ASTNode> get properties;
+
+  factory ASTObject(Map<ASTString, ASTNode> properties) = _ASTObject;
 
   @override
   bool operator ==(Object other) => switch (other) {
@@ -21,13 +26,57 @@ class ASTObject extends ASTNode {
   String toString() => 'ASTObject($properties)';
 }
 
-class ASTArray extends ASTNode {
-  final List<ASTNode> elements;
+class _ASTObject with ASTObject {
+  @override
+  final Map<ASTString, ASTNode> properties;
 
-  const ASTArray(this.elements);
+  const _ASTObject(this.properties);
+}
+
+class ASTObjectWithLocation with ASTObject implements ASTNodeWithLocation {
+  @override
+  final Map<ASTStringWithLocation, ASTNodeWithLocation> properties;
+
+  @override
+  final int start;
+  @override
+  final int end;
+
+  const ASTObjectWithLocation(this.properties, this.start, this.end);
+
+  @override
+  String toString() => 'ASTObject($properties, $start, $end)';
+}
+
+abstract mixin class ASTArray implements ASTNode {
+  List<ASTNode> get elements;
+
+  factory ASTArray(List<ASTNode> elements) = _ASTArray;
 
   @override
   String toString() => 'ASTArray($elements)';
+}
+
+class _ASTArray with ASTArray {
+  @override
+  final List<ASTNode> elements;
+
+  const _ASTArray(this.elements);
+}
+
+class ASTArrayWithLocation with ASTArray implements ASTNodeWithLocation {
+  @override
+  final List<ASTNodeWithLocation> elements;
+
+  @override
+  final int start;
+  @override
+  final int end;
+
+  const ASTArrayWithLocation(this.elements, this.start, this.end);
+
+  @override
+  String toString() => 'ASTArray($elements, $start, $end)';
 }
 
 class ASTString extends ASTNode {
@@ -49,6 +98,18 @@ class ASTString extends ASTNode {
   String toString() => 'ASTString("$value")';
 }
 
+class ASTStringWithLocation extends ASTString implements ASTNodeWithLocation {
+  @override
+  final int start;
+  @override
+  final int end;
+
+  const ASTStringWithLocation(super.value, this.start, this.end);
+
+  @override
+  String toString() => 'ASTString("$value", $start, $end)';
+}
+
 class ASTNumber extends ASTNode {
   final num value;
 
@@ -66,6 +127,18 @@ class ASTNumber extends ASTNode {
 
   @override
   String toString() => 'ASTNumber($value)';
+}
+
+class ASTNumberWithLocation extends ASTNumber implements ASTNodeWithLocation {
+  @override
+  final int start;
+  @override
+  final int end;
+
+  const ASTNumberWithLocation(super.value, this.start, this.end);
+
+  @override
+  String toString() => 'ASTNumber($value, $start, $end)';
 }
 
 class ASTBoolean extends ASTNode {
@@ -87,6 +160,18 @@ class ASTBoolean extends ASTNode {
   String toString() => 'ASTBoolean($value)';
 }
 
+class ASTBooleanWithLocation extends ASTBoolean implements ASTNodeWithLocation {
+  @override
+  final int start;
+  @override
+  int get end => start + (value ? 4 : 5);
+
+  const ASTBooleanWithLocation(super.value, this.start);
+
+  @override
+  String toString() => 'ASTBoolean($value, $start, $end)';
+}
+
 class ASTNull extends ASTNode {
   const ASTNull();
 
@@ -98,4 +183,16 @@ class ASTNull extends ASTNode {
 
   @override
   String toString() => 'ASTNull()';
+}
+
+class ASTNullWithLocation extends ASTNull implements ASTNodeWithLocation {
+  @override
+  final int start;
+  @override
+  int get end => start + 4;
+
+  const ASTNullWithLocation(this.start);
+
+  @override
+  String toString() => 'ASTNull($start, $end)';
 }

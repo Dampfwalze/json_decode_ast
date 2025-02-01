@@ -1,6 +1,14 @@
 import 'package:json_ast_parser/src/ast.dart';
 
-ASTNode jsonDecodeAST(String json, {bool allowInputAfter = false}) {
+bool _provideLocation = false;
+
+ASTNode jsonDecodeAST(
+  String json, {
+  bool allowInputAfter = false,
+  bool provideLocation = false,
+}) {
+  _provideLocation = provideLocation;
+
   final (value, index) = parseValue(json, 0);
 
   if (!allowInputAfter && index < json.length) {
@@ -11,6 +19,13 @@ ASTNode jsonDecodeAST(String json, {bool allowInputAfter = false}) {
 
   return value;
 }
+
+ASTNodeWithLocation jsonDecodeASTWithLocation(
+  String json, {
+  bool allowInputAfter = false,
+}) =>
+    jsonDecodeAST(json, allowInputAfter: allowInputAfter, provideLocation: true)
+        as ASTNodeWithLocation;
 
 (ASTNode, int) parseValue(String json, int start) {
   start = _flushWhitespace(json, start);
@@ -30,13 +45,24 @@ ASTNode jsonDecodeAST(String json, {bool allowInputAfter = false}) {
     '7' ||
     '8' ||
     '9' => parseNumber(json, start),
-    // '/' when json.at(start + 1) == '/' => parseLineComment(json, start),
-    // '/' when json.at(start + 1) == '*' => parseBlockComment(json, start),
     null => throw FormatException('Unexpected end of input'),
     _ => switch (_nextWord(json, start)) {
-      'true' => (ASTBoolean(true), start + 4),
-      'false' => (ASTBoolean(false), start + 5),
-      'null' => (ASTNull(), start + 4),
+      'true' => (
+        _provideLocation
+            ? ASTBooleanWithLocation(true, start)
+            : ASTBoolean(true),
+        start + 4,
+      ),
+      'false' => (
+        _provideLocation
+            ? ASTBooleanWithLocation(false, start)
+            : ASTBoolean(false),
+        start + 5,
+      ),
+      'null' => (
+        _provideLocation ? ASTNullWithLocation(start) : ASTNull(),
+        start + 4,
+      ),
       var w => throw FormatException('Unexpected word: $w'),
     },
   };
@@ -119,7 +145,14 @@ String _nextWord(String json, int start) {
     }
   }
 
-  return (ASTObject(properties), index + 1);
+  if (_provideLocation) {
+    return (
+      ASTObjectWithLocation(properties.cast(), start, index + 1),
+      index + 1,
+    );
+  } else {
+    return (ASTObject(properties), index + 1);
+  }
 }
 
 (ASTArray, int) parseArray(String json, int start) {
@@ -136,7 +169,11 @@ String _nextWord(String json, int start) {
     }
   }
 
-  return (ASTArray(elements), index + 1);
+  if (_provideLocation) {
+    return (ASTArrayWithLocation(elements.cast(), start, index + 1), index + 1);
+  } else {
+    return (ASTArray(elements), index + 1);
+  }
 }
 
 (ASTString, int) parseString(String json, int start) {
@@ -189,7 +226,11 @@ String _nextWord(String json, int start) {
 
   sb.write(json.substring(subStart, end));
 
-  return (ASTString(sb.toString()), end + 1);
+  if (_provideLocation) {
+    return (ASTStringWithLocation(sb.toString(), start, end + 1), end + 1);
+  } else {
+    return (ASTString(sb.toString()), end + 1);
+  }
 }
 
 (ASTNumber, int) parseNumber(String json, int start) {
@@ -205,7 +246,14 @@ String _nextWord(String json, int start) {
     end++
   ) {}
 
-  return (ASTNumber(num.parse(json.substring(start, end))), end);
+  if (_provideLocation) {
+    return (
+      ASTNumberWithLocation(num.parse(json.substring(start, end)), start, end),
+      end,
+    );
+  } else {
+    return (ASTNumber(num.parse(json.substring(start, end))), end);
+  }
 }
 
 extension on String {

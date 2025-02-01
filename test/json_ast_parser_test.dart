@@ -462,9 +462,9 @@ void main() {
     test('Big JSON', () {
       final random = Random(83792465);
 
-      final times = <(Duration, Duration)>[];
+      final times = <(Duration, Duration, Duration)>[];
 
-      for (final jsonString in Iterable.generate(100, (_) {
+      for (final jsonString in Iterable.generate(30, (_) {
         while (true) {
           final json = jsonEncode(randomJson(random, 10));
           if (json.length > 500) {
@@ -478,22 +478,28 @@ void main() {
         stopwatch.reset();
         jsonDecodeAST(jsonString);
         final astDuration = stopwatch.elapsed;
+        stopwatch.reset();
+        jsonDecodeASTWithLocation(jsonString);
+        final astLocationDuration = stopwatch.elapsed;
 
         print(
-          'std: $stdDuration, ast: $astDuration, ratio: ${(astDuration.inMicroseconds / stdDuration.inMicroseconds * 100).toStringAsFixed(2)} %',
+          'std: $stdDuration, ast: $astDuration, loc: $astLocationDuration, '
+          'ratio: ${(astDuration.inMicroseconds / stdDuration.inMicroseconds * 100).toStringAsFixed(2)} %, '
+          'loc ratio: ${(astLocationDuration.inMicroseconds / stdDuration.inMicroseconds * 100).toStringAsFixed(2)} %',
         );
 
-        times.add((stdDuration, astDuration));
+        times.add((stdDuration, astDuration, astLocationDuration));
       }
 
-      final stdAverage =
-          times.map((e) => e.$1).reduce((a, b) => a + b) ~/ times.length;
-
-      final astAverage =
-          times.map((e) => e.$2).reduce((a, b) => a + b) ~/ times.length;
+      final average = times.reduce(
+        (a, b) => (a.$1 + b.$1, a.$2 + b.$2, a.$3 + b.$3),
+      );
 
       print(
-        '\nstd average: $stdAverage, ast average: $astAverage, ratio: ${(astAverage.inMicroseconds / stdAverage.inMicroseconds * 100).toStringAsFixed(2)} %',
+        '\nstd average: ${average.$1}, ast average: ${average.$2}, loc average: ${average.$3}, '
+        'ratio: ${(average.$2.inMicroseconds / average.$1.inMicroseconds * 100).toStringAsFixed(2)} %, '
+        'loc ratio: ${(average.$3.inMicroseconds / average.$1.inMicroseconds * 100).toStringAsFixed(2)} %, '
+        'with/without location: ${(average.$3.inMicroseconds / average.$2.inMicroseconds * 100).toStringAsFixed(2)} %',
       );
     });
   });

@@ -2,15 +2,22 @@ import 'package:collection/collection.dart';
 
 sealed class ASTNode {
   const ASTNode();
+
+  dynamic toNode();
 }
 
-abstract interface class ASTNodeWithLocation implements ASTNode {
+sealed class ASTNodeWithLocation implements ASTNode {
   int get start;
   int get end;
 }
 
 abstract mixin class ASTObject implements ASTNode, Map<ASTString, ASTNode> {
   factory ASTObject(Map<ASTString, ASTNode> properties) = _ASTObject;
+
+  @override
+  Map<String, dynamic> toNode() => {
+    for (final entry in entries) entry.key.value: entry.value.toNode(),
+  };
 }
 
 class _ASTObject extends DelegatingMap<ASTString, ASTNode> with ASTObject {
@@ -36,6 +43,9 @@ class ASTObjectWithLocation extends DelegatingMap<ASTString, ASTNode>
 
 abstract mixin class ASTArray implements ASTNode, List<ASTNode> {
   factory ASTArray(List<ASTNode> elements) = _ASTArray;
+
+  @override
+  List<dynamic> toNode() => [for (final element in this) element.toNode()];
 }
 
 class _ASTArray extends DelegatingList<ASTNode> with ASTArray {
@@ -75,9 +85,12 @@ class ASTString extends ASTNode {
   int get hashCode => value.hashCode;
 
   @override
-  String toString() => value;
+  String toString() => 'ASTString("$value")';
 
   String toJson() => value;
+
+  @override
+  String toNode() => value;
 }
 
 class ASTStringWithLocation extends ASTString implements ASTNodeWithLocation {
@@ -111,6 +124,9 @@ class ASTNumber extends ASTNode {
   String toString() => 'ASTNumber($value)';
 
   num toJson() => value;
+
+  @override
+  num toNode() => value;
 }
 
 class ASTNumberWithLocation extends ASTNumber implements ASTNodeWithLocation {
@@ -144,6 +160,9 @@ class ASTBoolean extends ASTNode {
   String toString() => 'ASTBoolean($value)';
 
   bool toJson() => value;
+
+  @override
+  bool toNode() => value;
 }
 
 class ASTBooleanWithLocation extends ASTBoolean implements ASTNodeWithLocation {
@@ -171,6 +190,9 @@ class ASTNull extends ASTNode {
   String toString() => 'ASTNull()';
 
   Null toJson() => null;
+
+  @override
+  Null toNode() => null;
 }
 
 class ASTNullWithLocation extends ASTNull implements ASTNodeWithLocation {

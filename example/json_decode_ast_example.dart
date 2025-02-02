@@ -1,4 +1,4 @@
-import 'package:json_ast_parser/json_ast_parser.dart';
+import 'package:json_decode_ast/json_decode_ast.dart';
 
 void main() {
   final json = '''

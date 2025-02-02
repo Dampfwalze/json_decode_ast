@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:json_ast_parser/json_ast_parser.dart';
-import 'package:json_ast_parser/src/parse.dart';
+import 'package:json_decode_ast/json_decode_ast.dart';
+import 'package:json_decode_ast/src/parse.dart';
 import 'package:test/test.dart';
 
 void main() {

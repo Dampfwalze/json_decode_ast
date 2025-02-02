@@ -6,28 +6,38 @@ import 'ast.dart';
 
 ASTNode jsonDecodeAST(
   String json, {
-  bool allowInputAfter = false,
+  bool allowInputAfter = true,
   bool provideLocation = false,
+  bool allowComments = true,
 }) => JsonAstDecoder(
   allowInputAfter: allowInputAfter,
   provideLocation: provideLocation,
+  allowComments: allowComments,
 ).convert(json);
 
 ASTNodeWithLocation jsonDecodeASTWithLocation(
   String json, {
   bool allowInputAfter = false,
-}) =>
-    JsonAstDecoder.withLocation(allowInputAfter: allowInputAfter).convert(json);
+  bool allowComments = true,
+}) => JsonAstDecoder.withLocation(
+  allowInputAfter: allowInputAfter,
+  allowComments: allowComments,
+).convert(json);
 
 abstract interface class JsonAstDecoder implements Converter<String, ASTNode> {
-  const factory JsonAstDecoder({bool allowInputAfter, bool provideLocation}) =
-      JsonAstDecoderImpl;
+  const factory JsonAstDecoder({
+    bool allowInputAfter,
+    bool provideLocation,
+    bool allowComments,
+  }) = JsonAstDecoderImpl;
 
   static JsonAstDecoderWithLocation withLocation({
-    bool allowInputAfter = false,
+    bool allowInputAfter = true,
+    bool allowComments = true,
   }) => _JsonAstDecoderWithLocationImpl(
     provideLocation: true,
     allowInputAfter: allowInputAfter,
+    allowComments: allowComments,
   );
 
   ASTNode call(String input);
@@ -47,10 +57,12 @@ class JsonAstDecoderImpl extends Converter<String, ASTNode>
     implements JsonAstDecoder {
   final bool allowInputAfter;
   final bool provideLocation;
+  final bool allowComments;
 
   const JsonAstDecoderImpl({
-    this.allowInputAfter = false,
+    this.allowInputAfter = true,
     this.provideLocation = false,
+    this.allowComments = true,
   });
 
   @override
@@ -120,6 +132,9 @@ class JsonAstDecoderImpl extends Converter<String, ASTNode>
         case ' ' || '\n' || '\r' || '\t': // White space
           continue;
         case '/': // Comment
+          if (!allowComments) {
+            throw FormatException('Comments are not allowed, at index $index');
+          }
           index++;
           switch (json.at(index)) {
             case '/': // Line comment
@@ -138,11 +153,11 @@ class JsonAstDecoderImpl extends Converter<String, ASTNode>
               }
               break main;
             case null: // End of input
-              index--;
-              break main;
+              throw FormatException('Unexpected end of input');
             default:
-              index--;
-              break main;
+              throw FormatException(
+                'Unexpected character at index $index: ${json[index]}',
+              );
           }
         default:
           break main;

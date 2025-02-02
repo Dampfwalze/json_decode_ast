@@ -268,6 +268,15 @@ void main() {
     });
 
     group('Line comments', () {
+      test('Comments not allowed', () {
+        final p = JsonAstDecoder(allowComments: false);
+        expect(() => p.convert('0 // Comment'), throwsFormatException);
+        expect(
+          () => p.convert('//asd  \n0 // Comment\n'),
+          throwsFormatException,
+        );
+      });
+
       test('Single line', () {
         expect(p.parseValue('0 // Comment', 0).$1, equals(ASTNumber(0)));
         expect(
@@ -342,6 +351,15 @@ void main() {
     });
 
     group('Block comments', () {
+      test('Comments not allowed', () {
+        final p = JsonAstDecoder(allowComments: false);
+        expect(() => p.convert('0 /* Comment */'), throwsFormatException);
+        expect(
+          () => p.convert('/*asd*/0/* Comment*/\n'),
+          throwsFormatException,
+        );
+      });
+
       test('Single line', () {
         expect(p.parseValue('0 /* Comment */', 0).$1, equals(ASTNumber(0)));
         expect(

@@ -7,80 +7,88 @@ import 'package:test/test.dart';
 
 void main() {
   group('Parse values', () {
+    final p = JsonAstDecoderImpl();
+
     group('String', () {
       test('Empty String', () {
-        expect(parseString('""', 0), equals((ASTString(''), 2)));
+        expect(p.parseString('""', 0), equals((ASTString(''), 2)));
       });
 
       test('String with value', () {
-        expect(parseString('"hello"', 0), equals((ASTString('hello'), 7)));
-        expect(parseString('"world"', 0), equals((ASTString('world'), 7)));
+        expect(p.parseString('"hello"', 0), equals((ASTString('hello'), 7)));
+        expect(p.parseString('"world"', 0), equals((ASTString('world'), 7)));
       });
 
       test('String with whitespace', () {
-        expect(parseString('" hello "', 0), equals((ASTString(' hello '), 9)));
-        expect(parseString('" world "', 0), equals((ASTString(' world '), 9)));
-        expect(parseString('"   "', 0), equals((ASTString('   '), 5)));
+        expect(
+          p.parseString('" hello "', 0),
+          equals((ASTString(' hello '), 9)),
+        );
+        expect(
+          p.parseString('" world "', 0),
+          equals((ASTString(' world '), 9)),
+        );
+        expect(p.parseString('"   "', 0), equals((ASTString('   '), 5)));
       });
 
       test('Escapes', () {
-        expect(parseString(r'"\n"', 0).$1, equals(ASTString('\n')));
-        expect(parseString(r'"\t"', 0).$1, equals(ASTString('\t')));
-        expect(parseString(r'"\r"', 0).$1, equals(ASTString('\r')));
-        expect(parseString(r'"\b"', 0).$1, equals(ASTString('\b')));
-        expect(parseString(r'"\f"', 0).$1, equals(ASTString('\f')));
-        expect(parseString(r'"\\"', 0).$1, equals(ASTString('\\')));
-        expect(parseString(r'"\/"', 0).$1, equals(ASTString('/')));
-        expect(parseString(r'"\u0000"', 0).$1, equals(ASTString('\u0000')));
-        expect(parseString(r'"\u0001"', 0).$1, equals(ASTString('\u0001')));
-        expect(parseString(r'"\u0002"', 0).$1, equals(ASTString('\u0002')));
-        expect(parseString(r'"\u0003"', 0).$1, equals(ASTString('\u0003')));
-        expect(parseString(r'"\u0004"', 0).$1, equals(ASTString('\u0004')));
-        expect(parseString(r'"\u0005"', 0).$1, equals(ASTString('\u0005')));
-        expect(parseString(r'"\u0006"', 0).$1, equals(ASTString('\u0006')));
-        expect(parseString(r'"\u0007"', 0).$1, equals(ASTString('\u0007')));
-        expect(parseString(r'"\u0008"', 0).$1, equals(ASTString('\u0008')));
-        expect(parseString(r'"\u0009"', 0).$1, equals(ASTString('\u0009')));
-        expect(parseString(r'"\u000A"', 0).$1, equals(ASTString('\u000A')));
-        expect(parseString(r'"\u000B"', 0).$1, equals(ASTString('\u000B')));
-        expect(parseString(r'"\u000C"', 0).$1, equals(ASTString('\u000C')));
-        expect(parseString(r'"\u000D"', 0).$1, equals(ASTString('\u000D')));
-        expect(parseString(r'"\u000E"', 0).$1, equals(ASTString('\u000E')));
-        expect(parseString(r'"\u000F"', 0).$1, equals(ASTString('\u000F')));
-        expect(parseString(r'"\u0010"', 0).$1, equals(ASTString('\u0010')));
+        expect(p.parseString(r'"\n"', 0).$1, equals(ASTString('\n')));
+        expect(p.parseString(r'"\t"', 0).$1, equals(ASTString('\t')));
+        expect(p.parseString(r'"\r"', 0).$1, equals(ASTString('\r')));
+        expect(p.parseString(r'"\b"', 0).$1, equals(ASTString('\b')));
+        expect(p.parseString(r'"\f"', 0).$1, equals(ASTString('\f')));
+        expect(p.parseString(r'"\\"', 0).$1, equals(ASTString('\\')));
+        expect(p.parseString(r'"\/"', 0).$1, equals(ASTString('/')));
+        expect(p.parseString(r'"\u0000"', 0).$1, equals(ASTString('\u0000')));
+        expect(p.parseString(r'"\u0001"', 0).$1, equals(ASTString('\u0001')));
+        expect(p.parseString(r'"\u0002"', 0).$1, equals(ASTString('\u0002')));
+        expect(p.parseString(r'"\u0003"', 0).$1, equals(ASTString('\u0003')));
+        expect(p.parseString(r'"\u0004"', 0).$1, equals(ASTString('\u0004')));
+        expect(p.parseString(r'"\u0005"', 0).$1, equals(ASTString('\u0005')));
+        expect(p.parseString(r'"\u0006"', 0).$1, equals(ASTString('\u0006')));
+        expect(p.parseString(r'"\u0007"', 0).$1, equals(ASTString('\u0007')));
+        expect(p.parseString(r'"\u0008"', 0).$1, equals(ASTString('\u0008')));
+        expect(p.parseString(r'"\u0009"', 0).$1, equals(ASTString('\u0009')));
+        expect(p.parseString(r'"\u000A"', 0).$1, equals(ASTString('\u000A')));
+        expect(p.parseString(r'"\u000B"', 0).$1, equals(ASTString('\u000B')));
+        expect(p.parseString(r'"\u000C"', 0).$1, equals(ASTString('\u000C')));
+        expect(p.parseString(r'"\u000D"', 0).$1, equals(ASTString('\u000D')));
+        expect(p.parseString(r'"\u000E"', 0).$1, equals(ASTString('\u000E')));
+        expect(p.parseString(r'"\u000F"', 0).$1, equals(ASTString('\u000F')));
+        expect(p.parseString(r'"\u0010"', 0).$1, equals(ASTString('\u0010')));
       });
 
       test('String with Escapes', () {
         expect(
-          parseString(r'"hello\nworld"', 0),
+          p.parseString(r'"hello\nworld"', 0),
           equals((ASTString('hello\nworld'), 14)),
         );
         expect(
-          parseString(r'"hello\tworld"', 0),
+          p.parseString(r'"hello\tworld"', 0),
           equals((ASTString('hello\tworld'), 14)),
         );
         expect(
-          parseString(r'"hello\rworld"', 0),
+          p.parseString(r'"hello\rworld"', 0),
           equals((ASTString('hello\rworld'), 14)),
         );
         expect(
-          parseString(r'"hello\bworld"', 0),
+          p.parseString(r'"hello\bworld"', 0),
           equals((ASTString('hello\bworld'), 14)),
         );
         expect(
-          parseString(r'"hello\fworld"', 0),
+          p.parseString(r'"hello\fworld"', 0),
           equals((ASTString('hello\fworld'), 14)),
         );
         expect(
-          parseString(r'"hello\\world"', 0),
+          p.parseString(r'"hello\\world"', 0),
           equals((ASTString('hello\\world'), 14)),
         );
         expect(
-          parseString(r'"hello\/world"', 0),
+          p.parseString(r'"hello\/world"', 0),
           equals((ASTString('hello/world'), 14)),
         );
         expect(
-          parseString(r'"hello\u0000world"', 0),
+          p.parseString(r'"hello\u0000world"', 0),
           equals((ASTString('hello\u0000world'), 18)),
         );
       });
@@ -89,46 +97,46 @@ void main() {
     group('Number', () {
       test('Single digit', () {
         for (var i = 0; i < 10; i++) {
-          final (v, _) = parseNumber('$i', 0);
+          final (v, _) = p.parseNumber('$i', 0);
           expect(v, equals(ASTNumber(i)));
           expect(v.value, isA<int>());
         }
       });
 
       test('Multiple digits', () {
-        final (v, i) = parseNumber('1234567890', 0);
+        final (v, i) = p.parseNumber('1234567890', 0);
         expect(v, equals(ASTNumber(1234567890)));
         expect(v.value, isA<int>());
         expect(i, equals(10));
       });
 
       test('Negative number', () {
-        final (v, i) = parseNumber('-1234567890', 0);
+        final (v, i) = p.parseNumber('-1234567890', 0);
         expect(v, equals(ASTNumber(-1234567890)));
         expect(v.value, isA<int>());
         expect(i, equals(11));
       });
 
       test('Decimal number', () {
-        final (v, _) = parseNumber('123.456', 0);
+        final (v, _) = p.parseNumber('123.456', 0);
         expect(v, equals(ASTNumber(123.456)));
         expect(v.value, isA<double>());
       });
 
       test('Negative decimal number', () {
-        final (v, _) = parseNumber('-123.456', 0);
+        final (v, _) = p.parseNumber('-123.456', 0);
         expect(v, equals(ASTNumber(-123.456)));
         expect(v.value, isA<double>());
       });
 
       test('Exponential number', () {
         {
-          final (v, _) = parseNumber('123e4', 0);
+          final (v, _) = p.parseNumber('123e4', 0);
           expect(v, equals(ASTNumber(123e4)));
           expect(v.value, isA<double>());
         }
         {
-          final (v, _) = parseNumber('123E4', 0);
+          final (v, _) = p.parseNumber('123E4', 0);
           expect(v, equals(ASTNumber(123e4)));
           expect(v.value, isA<double>());
         }
@@ -137,42 +145,42 @@ void main() {
 
     group('Array', () {
       test('Empty', () {
-        expect(parseArray('[]', 0).$1, orderedEquals([]));
-        expect(parseArray('[  ]', 0).$1, orderedEquals([]));
-        expect(parseArray('[\n]', 0).$1, orderedEquals([]));
-        expect(() => parseArray('[,]', 0), throwsFormatException);
+        expect(p.parseArray('[]', 0).$1, orderedEquals([]));
+        expect(p.parseArray('[  ]', 0).$1, orderedEquals([]));
+        expect(p.parseArray('[\n]', 0).$1, orderedEquals([]));
+        expect(() => p.parseArray('[,]', 0), throwsFormatException);
       });
 
       test('Single element', () {
-        expect(parseArray('[0]', 0).$1, orderedEquals([ASTNumber(0)]));
-        expect(parseArray('[0,]', 0).$1, orderedEquals([ASTNumber(0)]));
-        expect(parseArray('["", ]', 0).$1, orderedEquals([ASTString("")]));
+        expect(p.parseArray('[0]', 0).$1, orderedEquals([ASTNumber(0)]));
+        expect(p.parseArray('[0,]', 0).$1, orderedEquals([ASTNumber(0)]));
+        expect(p.parseArray('["", ]', 0).$1, orderedEquals([ASTString("")]));
         expect(
-          parseArray('[  true\n]', 0).$1,
+          p.parseArray('[  true\n]', 0).$1,
           orderedEquals([ASTBoolean(true)]),
         );
         expect(
-          parseArray('[false\n,]', 0).$1,
+          p.parseArray('[false\n,]', 0).$1,
           orderedEquals([ASTBoolean(false)]),
         );
-        expect(parseArray('[  null\n, ]', 0).$1, orderedEquals([ASTNull()]));
+        expect(p.parseArray('[  null\n, ]', 0).$1, orderedEquals([ASTNull()]));
       });
 
       test('Multiple elements', () {
         expect(
-          parseArray('[0, 1, 2]', 0).$1,
+          p.parseArray('[0, 1, 2]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1), ASTNumber(2)]),
         );
         expect(
-          parseArray('[0, 1, 2,]', 0).$1,
+          p.parseArray('[0, 1, 2,]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1), ASTNumber(2)]),
         );
         expect(
-          parseArray('[0, 1, 2, ]', 0).$1,
+          p.parseArray('[0, 1, 2, ]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1), ASTNumber(2)]),
         );
         expect(
-          parseArray('[0, 1, 2,  ]', 0).$1,
+          p.parseArray('[0, 1, 2,  ]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1), ASTNumber(2)]),
         );
       });
@@ -180,44 +188,44 @@ void main() {
 
     group('Object', () {
       test('Empty', () {
-        expect(parseObject('{}', 0).$1, equals({}));
-        expect(parseObject('{  }', 0).$1, equals({}));
-        expect(parseObject('{\n}', 0).$1, equals({}));
-        expect(() => parseObject('{,}', 0), throwsFormatException);
+        expect(p.parseObject('{}', 0).$1, equals({}));
+        expect(p.parseObject('{  }', 0).$1, equals({}));
+        expect(p.parseObject('{\n}', 0).$1, equals({}));
+        expect(() => p.parseObject('{,}', 0), throwsFormatException);
       });
 
       test('Single property', () {
         expect(
-          parseObject('{"key":0}', 0).$1,
+          p.parseObject('{"key":0}', 0).$1,
           equals({ASTString('key'): ASTNumber(0)}),
         );
         expect(
-          parseObject('{ "key" :0,}', 0).$1,
+          p.parseObject('{ "key" :0,}', 0).$1,
           equals({ASTString('key'): ASTNumber(0)}),
         );
         expect(
-          parseObject('{  "key"   :   0  , }', 0).$1,
+          p.parseObject('{  "key"   :   0  , }', 0).$1,
           equals({ASTString('key'): ASTNumber(0)}),
         );
       });
 
       test('Multiple properties', () {
         expect(
-          parseObject('{"key":0,"key2":1}', 0).$1,
+          p.parseObject('{"key":0,"key2":1}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject('{ "key" :0, "key2":1,}', 0).$1,
+          p.parseObject('{ "key" :0, "key2":1,}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject('{  "key"   :   0  , "key2":1, }', 0).$1,
+          p.parseObject('{  "key"   :   0  , "key2":1, }', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
@@ -227,7 +235,7 @@ void main() {
 
       test('Recursive', () {
         {
-          final (object, _) = parseObject('{"key":{}}', 0);
+          final (object, _) = p.parseObject('{"key":{}}', 0);
           if (object case {
             const ASTString("key"): var p,
           } when p is ASTObject && p.isEmpty) {
@@ -236,14 +244,14 @@ void main() {
           }
         }
         {
-          final (object, _) = parseObject('{ "key":[  ] }  ', 0);
+          final (object, _) = p.parseObject('{ "key":[  ] }  ', 0);
           if (object case {const ASTString("key"): []}) {
           } else {
             fail('Unexpected ASTObject: $object');
           }
         }
         {
-          final (object, _) = parseObject(
+          final (object, _) = p.parseObject(
             '{  "key "   :  [{ "Hello" : "World" }],  }',
             0,
           );
@@ -261,66 +269,70 @@ void main() {
 
     group('Line comments', () {
       test('Single line', () {
-        expect(parseValue('0 // Comment', 0).$1, equals(ASTNumber(0)));
+        expect(p.parseValue('0 // Comment', 0).$1, equals(ASTNumber(0)));
         expect(
-          parseValue('//asd  \n0 // Comment\n', 0).$1,
+          p.parseValue('//asd  \n0 // Comment\n', 0).$1,
           equals(ASTNumber(0)),
         );
         expect(
-          parseValue('// Hello\n"world" //Comment\n0', 0).$1,
+          p.parseValue('// Hello\n"world" //Comment\n0', 0).$1,
           equals(ASTString('world')),
         );
         expect(
-          parseValue('// Hello "world" //Comment\n0', 0).$1,
+          p.parseValue('// Hello "world" //Comment\n0', 0).$1,
           equals(ASTNumber(0)),
         );
       });
 
       test('In array', () {
         expect(
-          parseArray('[0, // Comment\n1]', 0).$1,
+          p.parseArray('[0, // Comment\n1]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
         expect(
-          parseArray('[0, // Hello, World\n1,]', 0).$1,
+          p.parseArray('[0, // Hello, World\n1,]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
         expect(
-          parseArray('[0, // [This, should, not, matter]\n1,]', 0).$1,
+          p.parseArray('[0, // [This, should, not, matter]\n1,]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
       });
 
       test('In object', () {
         expect(
-          parseObject('{"key":0, // Comment\n"key2":1}', 0).$1,
+          p.parseObject('{"key":0, // Comment\n"key2":1}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject('{ "key" :0, // Hello, World\n"key2":1,}', 0).$1,
+          p.parseObject('{ "key" :0, // Hello, World\n"key2":1,}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject(
-            '{  "key"   :   0  , // ["This", "should", "not", "matter"]\n "key2":1, }',
-            0,
-          ).$1,
+          p
+              .parseObject(
+                '{  "key"   :   0  , // ["This", "should", "not", "matter"]\n "key2":1, }',
+                0,
+              )
+              .$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject(
-            '{  "key"   :   0  ,// {"this": "should", "not": "matter"}\n "key2":1, }',
-            0,
-          ).$1,
+          p
+              .parseObject(
+                '{  "key"   :   0  ,// {"this": "should", "not": "matter"}\n "key2":1, }',
+                0,
+              )
+              .$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
@@ -331,66 +343,70 @@ void main() {
 
     group('Block comments', () {
       test('Single line', () {
-        expect(parseValue('0 /* Comment */', 0).$1, equals(ASTNumber(0)));
+        expect(p.parseValue('0 /* Comment */', 0).$1, equals(ASTNumber(0)));
         expect(
-          parseValue('/*asd*/0/* Comment*/\n', 0).$1,
+          p.parseValue('/*asd*/0/* Comment*/\n', 0).$1,
           equals(ASTNumber(0)),
         );
         expect(
-          parseValue('/* Hello */"world" /*Comment*/\n0', 0).$1,
+          p.parseValue('/* Hello */"world" /*Comment*/\n0', 0).$1,
           equals(ASTString('world')),
         );
         expect(
-          parseValue('/* Hello "world" */ /*Comment*/\n0', 0).$1,
+          p.parseValue('/* Hello "world" */ /*Comment*/\n0', 0).$1,
           equals(ASTNumber(0)),
         );
       });
 
       test('In array', () {
         expect(
-          parseArray('[0, /* Comment */1]', 0).$1,
+          p.parseArray('[0, /* Comment */1]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
         expect(
-          parseArray('[0,/* Hello, World */\n1,]', 0).$1,
+          p.parseArray('[0,/* Hello, World */\n1,]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
         expect(
-          parseArray('[0, /* [This, should, not, matter] */1,]', 0).$1,
+          p.parseArray('[0, /* [This, should, not, matter] */1,]', 0).$1,
           orderedEquals([ASTNumber(0), ASTNumber(1)]),
         );
       });
 
       test('In object', () {
         expect(
-          parseObject('{"key":0, /* Comment */\n"key2":1}', 0).$1,
+          p.parseObject('{"key":0, /* Comment */\n"key2":1}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject('{ "key" :0,/* Hello, World */"key2":1,}', 0).$1,
+          p.parseObject('{ "key" :0,/* Hello, World */"key2":1,}', 0).$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject(
-            '{  "key"   :   0  , /* ["This", "should", "not", "matter"] */\n "key2":1, }',
-            0,
-          ).$1,
+          p
+              .parseObject(
+                '{  "key"   :   0  , /* ["This", "should", "not", "matter"] */\n "key2":1, }',
+                0,
+              )
+              .$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),
           }),
         );
         expect(
-          parseObject(
-            '{  "key"   :   0  ,/* {"this": "should", "not": "matter"} */"key2":1, }',
-            0,
-          ).$1,
+          p
+              .parseObject(
+                '{  "key"   :   0  ,/* {"this": "should", "not": "matter"} */"key2":1, }',
+                0,
+              )
+              .$1,
           equals({
             ASTString('key'): ASTNumber(0),
             ASTString('key2'): ASTNumber(1),

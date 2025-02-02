@@ -19,4 +19,6 @@ void main() {
   ).convert(json);
 
   print(ast);
+
+  print(ast.toNode());
 }

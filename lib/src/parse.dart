@@ -47,6 +47,10 @@ mixin JsonAstDecoderWithLocation on JsonAstDecoder {
   @override
   ASTNodeWithLocation convert(String input) =>
       super.convert(input) as ASTNodeWithLocation;
+
+  @override
+  ASTNodeWithLocation call(String input) =>
+      super.call(input) as ASTNodeWithLocation;
 }
 
 class _JsonAstDecoderWithLocationImpl = JsonAstDecoderImpl
@@ -79,8 +83,7 @@ class JsonAstDecoderImpl extends Converter<String, ASTNode>
   }
 
   @override
-  ASTNodeWithLocation call(String input) =>
-      convert(input) as ASTNodeWithLocation;
+  ASTNode call(String input) => convert(input);
 
   (ASTNode, int) parseValue(String json, int start) {
     start = _flushWhitespace(json, start);

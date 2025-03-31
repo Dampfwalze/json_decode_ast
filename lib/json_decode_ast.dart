@@ -7,3 +7,4 @@ export 'src/parse.dart'
         jsonDecodeASTWithLocation,
         JsonAstDecoder,
         JsonAstDecoderWithLocation;
+export 'src/ast_ext.dart';
